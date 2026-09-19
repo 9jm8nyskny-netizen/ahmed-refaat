@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>المتقدمون للوظائف</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f3f5f8;
+    --surface:#ffffff;
+    --surface-2:#f8fafc;
+    --border:#e2e6ec;
+    --text:#1f2937;
+    --text-muted:#6b7280;
+    --primary:#1e3a5f;
+    --primary-dark:#152a45;
+    --accent:#0f8a8a;
+    --accent-dark:#0b6b6b;
+    --danger:#c0392b;
+    --danger-dark:#a5301f;
+    --shadow: 0 1px 3px rgba(16,24,40,0.06), 0 1px 2px rgba(16,24,40,0.04);
+    --shadow-md: 0 4px 14px rgba(16,24,40,0.08);
+    --radius: 14px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#12161c; --surface:#1a1f27; --surface-2:#20262f; --border:#2b323d;
+      --text:#e8eaed; --text-muted:#9aa3b0; --primary:#3d6ea5; --primary-dark:#2e5680;
+      --accent:#1fb3ac; --accent-dark:#178f89; --danger:#e0685a; --danger-dark:#c94f42;
+      --shadow: 0 1px 3px rgba(0,0,0,0.35), 0 1px 2px rgba(0,0,0,0.3);
+      --shadow-md: 0 6px 18px rgba(0,0,0,0.4);
+    }
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg); color:var(--text);
+    font-family:'Tajawal','Segoe UI',Tahoma,Arial,sans-serif;
+    min-height:100vh; -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:880px;margin:0 auto;padding:20px 16px 80px;}
+  header.topbar{
+    display:flex;flex-direction:column;gap:14px;padding:22px 0 18px;
+    position:sticky;top:0;background:linear-gradient(var(--bg) 82%, transparent);z-index:5;
+  }
+  .title-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+  .header-actions{display:flex;gap:8px;flex-wrap:wrap;}
+  .trash-count{
+    display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;
+    background:var(--danger);color:#fff;border-radius:999px;font-size:0.68rem;font-weight:700;
+    margin-inline-start:6px;padding:0 5px;
+  }
+  .restore-btn{
+    display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:8px;font-size:0.83rem;
+    font-weight:700;border:1px solid #059669;color:#059669;background:transparent;cursor:pointer;font-family:inherit;
+  }
+  .restore-btn:hover{background:#ecfdf5;}
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]) .restore-btn:hover{background:#0d2b22;}
+  }
+  .finalize-btn{
+    display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:8px;font-size:0.83rem;
+    font-weight:700;border:1px solid var(--danger);color:var(--danger);background:transparent;cursor:pointer;font-family:inherit;
+  }
+  .finalize-btn:hover{background:var(--danger);color:#fff;}
+  .card.trashed{opacity:0.85;}
+  h1{font-size:1.55rem;font-weight:900;margin:0;color:var(--primary);letter-spacing:-0.3px;}
+  .subtitle{color:var(--text-muted);font-size:0.85rem;margin-top:2px;}
+  .btn{
+    border:none;border-radius:10px;padding:11px 18px;font-family:inherit;font-size:0.92rem;
+    font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px;
+    transition:transform .05s ease, filter .15s ease, opacity .15s ease;white-space:nowrap;
+  }
+  .btn:active{transform:scale(0.97);}
+  .btn-primary{background:var(--accent);color:#fff;}
+  .btn-primary:hover{filter:brightness(1.06);}
+  .btn-secondary{background:var(--surface-2);color:var(--text);border:1px solid var(--border);}
+  .btn-secondary:hover{background:var(--border);}
+  .btn-danger{background:transparent;color:var(--danger);border:1px solid var(--danger);}
+  .btn:disabled{opacity:0.55;cursor:not-allowed;}
+  .btn-sm{padding:8px 13px;font-size:0.83rem;border-radius:8px;}
+  .search-box{position:relative;width:100%;}
+  .search-box input{
+    width:100%;padding:12px 44px 12px 14px;border-radius:11px;border:1px solid var(--border);
+    background:var(--surface);color:var(--text);font-family:inherit;font-size:0.95rem;outline:none;
+    transition:border-color .15s ease;
+  }
+  .search-box input:focus{border-color:var(--accent);}
+  .search-box .icon{position:absolute;top:50%;right:14px;transform:translateY(-50%);color:var(--text-muted);pointer-events:none;}
+  .rating-dots{display:inline-flex;gap:3px;vertical-align:middle;margin-inline-start:8px;}
+  .rating-dot{width:9px;height:9px;border-radius:50%;display:inline-block;}
+  .card.approved{border-inline-start:4px solid #059669;}
+  .salary-line{
+    display:inline-flex;align-items:center;gap:4px;font-size:0.8rem;font-weight:700;
+    color:#059669;background:#ecfdf5;padding:4px 10px;border-radius:7px;margin-inline-start:8px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]) .salary-line{background:#0d2b22;color:#34d399;}
+  }
+  .interview-line{
+    display:inline-flex;align-items:center;gap:4px;font-size:0.8rem;font-weight:700;
+    color:var(--primary);background:var(--surface-2);border:1px solid var(--border);
+    padding:4px 10px;border-radius:7px;margin-inline-start:8px;
+  }
+  .interview-options{display:flex;flex-direction:column;gap:8px;}
+  .interview-opt{
+    padding:13px 14px;border-radius:10px;border:1px solid var(--border);background:var(--surface-2);
+    color:var(--text);font-family:inherit;font-size:0.9rem;font-weight:700;cursor:pointer;text-align:right;
+    transition:border-color .15s ease, background .15s ease, color .15s ease;display:flex;align-items:center;gap:8px;
+  }
+  .interview-opt:hover{border-color:var(--accent);}
+  .interview-opt.selected{border-color:#059669;background:#ecfdf5;color:#047857;}
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]) .interview-opt.selected{background:#0d2b22;color:#34d399;}
+  }
+  .approve-btn{
+    display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:8px;font-size:0.83rem;
+    font-weight:700;border:1px solid var(--border);color:var(--text-muted);background:var(--surface-2);cursor:pointer;font-family:inherit;
+  }
+  .approve-btn:hover{background:var(--border);}
+  .approve-btn.approved{background:#059669;border-color:#059669;color:#fff;}
+  .approve-btn.approved:hover{filter:brightness(1.08);}
+  .star-picker{display:flex;gap:6px;}
+  .star-picker .star{font-size:1.7rem;line-height:1;color:var(--border);cursor:pointer;transition:color .12s ease;user-select:none;}
+  .star-picker .star.filled{color:#059669;}
+  .list{display:flex;flex-direction:column;gap:12px;margin-top:6px;}
+  .card{
+    background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+    padding:16px 18px;box-shadow:var(--shadow);transition:box-shadow .15s ease;
+  }
+  .card:hover{box-shadow:var(--shadow-md);}
+  .card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;}
+  .card-top-main{display:flex;align-items:center;gap:12px;min-width:0;}
+  .avatar{
+    width:52px;height:52px;border-radius:50%;object-fit:cover;flex-shrink:0;
+    border:1px solid var(--border);background:var(--surface-2);
+  }
+  .avatar-placeholder{
+    width:52px;height:52px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+    background:var(--primary);color:#fff;font-weight:700;font-size:1.05rem;
+  }
+  .applicant-name{font-size:1.12rem;font-weight:700;color:var(--text);margin:0 0 3px;}
+  .nationality-badge{
+    font-size:0.72rem;font-weight:600;color:var(--text-muted);background:var(--surface-2);
+    border:1px solid var(--border);padding:2px 8px;border-radius:6px;margin-inline-start:6px;
+    vertical-align:middle;display:inline-block;
+  }
+  .applicant-role{color:var(--accent-dark);font-weight:600;font-size:0.9rem;margin:0;}
+  .applicant-meta{color:var(--text-muted);font-size:0.82rem;margin-top:6px;display:flex;flex-wrap:wrap;gap:4px 14px;}
+  .applicant-notes{color:var(--text-muted);font-size:0.85rem;margin-top:8px;line-height:1.5;white-space:pre-wrap;}
+  .card-actions{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;align-items:center;}
+  .file-btn{
+    display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:8px;font-size:0.83rem;
+    font-weight:700;text-decoration:none;border:1px solid var(--border);color:var(--text);background:var(--surface-2);
+  }
+  .file-btn:hover{background:var(--border);}
+  .file-btn.missing{opacity:0.5;cursor:not-allowed;pointer-events:none;}
+  .icon-btn{
+    background:transparent;border:none;cursor:pointer;color:var(--text-muted);font-size:0.83rem;
+    padding:8px 10px;border-radius:8px;font-family:inherit;font-weight:600;
+  }
+  .icon-btn:hover{background:var(--surface-2);color:var(--text);}
+  .icon-btn.danger:hover{background:rgba(192,57,43,0.1);color:var(--danger);}
+  .spacer-actions{margin-inline-start:auto;display:flex;gap:4px;}
+  .empty-state{text-align:center;padding:70px 20px;color:var(--text-muted);}
+  .empty-state .big-icon{font-size:2.6rem;margin-bottom:10px;}
+  .empty-state h3{color:var(--text);margin:0 0 6px;}
+  .modal-overlay{
+    position:fixed;inset:0;background:rgba(15,20,26,0.5);display:none;align-items:flex-start;
+    justify-content:center;padding:24px 14px;overflow-y:auto;z-index:50;
+  }
+  .modal-overlay.open{display:flex;}
+  .modal{
+    background:var(--surface);border-radius:16px;width:100%;max-width:480px;padding:22px;
+    box-shadow:0 20px 50px rgba(0,0,0,0.25);margin-top:20px;
+  }
+  .modal h2{margin:0 0 4px;font-size:1.2rem;color:var(--primary);}
+  .modal .modal-sub{color:var(--text-muted);font-size:0.83rem;margin-bottom:16px;}
+  .field{margin-bottom:14px;}
+  .field label{display:block;font-size:0.85rem;font-weight:700;margin-bottom:6px;color:var(--text);}
+  .field .req{color:var(--danger);}
+  .field .hint{display:block;font-size:0.75rem;font-weight:400;color:var(--text-muted);margin-top:4px;}
+  .field input[type=text], .field input[type=tel], .field input[type=url], .field textarea{
+    width:100%;padding:11px 12px;border-radius:9px;border:1px solid var(--border);
+    background:var(--surface-2);color:var(--text);font-family:inherit;font-size:0.92rem;outline:none;
+    direction:ltr;text-align:right;
+  }
+  .field textarea{direction:rtl;}
+  .field input:focus, .field textarea:focus{border-color:var(--accent);}
+  .field textarea{resize:vertical;min-height:70px;}
+  .photo-field{display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+  .photo-preview{
+    width:56px;height:56px;border-radius:50%;object-fit:cover;border:1px solid var(--border);
+    background:var(--surface-2);flex-shrink:0;
+  }
+  .photo-preview-placeholder{
+    width:56px;height:56px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+    background:var(--surface-2);border:1px dashed var(--border);color:var(--text-muted);font-size:1.3rem;
+  }
+  .photo-field .field{flex:1;min-width:180px;margin-bottom:0;}
+  .modal-footer{display:flex;gap:10px;margin-top:20px;}
+  .modal-footer .btn{flex:1;justify-content:center;}
+  .toast{
+    position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(12px);
+    background:var(--primary-dark);color:#fff;padding:11px 20px;border-radius:10px;font-size:0.88rem;
+    box-shadow:var(--shadow-md);opacity:0;pointer-events:none;transition:opacity .2s ease, transform .2s ease;
+    z-index:100;max-width:90vw;text-align:center;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  .toast.error{background:var(--danger-dark);}
+  .banner{
+    background:#fff7e6;border:1px solid #f0c36d;color:#8a6115;border-radius:10px;
+    padding:10px 14px;font-size:0.83rem;margin-bottom:14px;
+  }
+  .spinner{
+    width:16px;height:16px;border:2.5px solid rgba(255,255,255,0.4);border-top-color:#fff;
+    border-radius:50%;display:inline-block;animation:spin .7s linear infinite;vertical-align:middle;
+  }
+  @keyframes spin{to{transform:rotate(360deg);}}
+  ::selection{background:var(--accent);color:#fff;}
+  @media (max-width:520px){
+    h1{font-size:1.3rem;}
+    .card{padding:14px;}
+    .btn-primary.add-btn{width:100%;justify-content:center;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="topbar">
+    <div class="title-row">
+      <div>
+        <h1>المتقدمون للوظائف</h1>
+        <div class="subtitle" id="subtitleCount">جاري التحميل...</div>
+      </div>
+      <div class="header-actions">
+        <button class="btn btn-secondary" id="trashBtn"><span id="trashLabel">🗑️ المحذوفات</span><span class="trash-count" id="trashCount" style="display:none;">0</span></button>
+        <button class="btn btn-primary add-btn" id="openAddBtn">＋ إضافة متقدم</button>
+      </div>
+    </div>
+    <div class="search-box" id="searchBoxWrap">
+      <input type="text" id="searchInput" placeholder="ابحث بالاسم أو الوظيفة...">
+      <span class="icon">🔍</span>
+    </div>
+  </header>
+
+  <div id="bannerArea"></div>
+  <div class="list" id="list"></div>
+</div>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <h2 id="modalTitle">إضافة متقدم جديد</h2>
+    <div class="modal-sub">أدخلي بيانات المتقدم وروابط ملفاته أدناه</div>
+    <form id="applicantForm">
+      <div class="field">
+        <div class="photo-field">
+          <img id="photoPreviewImg" class="photo-preview" style="display:none;" alt="صورة المتقدم">
+          <div id="photoPreviewPlaceholder" class="photo-preview-placeholder">🙂</div>
+          <div class="field">
+            <label>🖼️ رابط الصورة الشخصية (اختياري)</label>
+            <input type="url" id="fPhotoUrl" placeholder="https://...">
+          </div>
+        </div>
+      </div>
+      <div class="field">
+        <label>الاسم <span class="req">*</span></label>
+        <input type="text" id="fName" required placeholder="مثال: محمد أحمد">
+      </div>
+      <div class="field">
+        <label>🌍 الجنسية</label>
+        <input type="text" id="fNationality" placeholder="مثال: سعودي">
+      </div>
+      <div class="field">
+        <label>رقم الجوال</label>
+        <input type="tel" id="fPhone" placeholder="05xxxxxxxx">
+      </div>
+      <div class="field">
+        <label>الوظيفة المتقدم عليها <span class="req">*</span></label>
+        <input type="text" id="fRole" required placeholder="مثال: مهندس تصميم داخلي">
+      </div>
+      <div class="field">
+        <label>📄 رابط السيرة الذاتية (CV)</label>
+        <input type="url" id="fCvUrl" placeholder="رابط Google Drive أو LinkedIn...">
+        <span class="hint">الصقي رابط مشاركة الملف من Google Drive (تأكدي أن إعداد المشاركة "أي شخص لديه الرابط")، أو رابط LinkedIn</span>
+      </div>
+      <div class="field">
+        <label>📁 رابط ملف الأعمال (Portfolio)</label>
+        <input type="url" id="fPortfolioUrl" placeholder="رابط Google Drive أو LinkedIn...">
+      </div>
+      <div class="field">
+        <label>⭐ مدى ملاءمة المتقدم للوظيفة (اختياري)</label>
+        <div class="star-picker" id="starPicker">
+          <span class="star" data-val="1">★</span>
+          <span class="star" data-val="2">★</span>
+          <span class="star" data-val="3">★</span>
+          <span class="star" data-val="4">★</span>
+          <span class="star" data-val="5">★</span>
+        </div>
+        <input type="hidden" id="fRating" value="0">
+        <span class="hint">كلما زادت النجوم زاد ترتيب المتقدم عند اختيار الترتيب "الأنسب"</span>
+      </div>
+      <div class="field">
+        <label>ملاحظات</label>
+        <textarea id="fNotes" placeholder="أي ملاحظات إضافية..."></textarea>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="cancelBtn">إلغاء</button>
+        <button type="submit" class="btn btn-primary" id="saveBtn">حفظ المتقدم</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="modal-overlay" id="approveModalOverlay">
+  <div class="modal" style="max-width:380px;">
+    <h2>تحديد الراتب المناسب</h2>
+    <div class="modal-sub">حدّدي الراتب المناسب لهذا المتقدم، وسيتواصل فريق شؤون الموظفين معه بناءً على هذا الراتب</div>
+    <div class="field">
+      <label>💰 الراتب المناسب للتواصل</label>
+      <input type="text" id="approveSalaryInput" placeholder="مثال: 4000 ريال">
+      <span class="hint">هذا هو الرقم الذي سيُطلع عليه فريق شؤون الموظفين عند التواصل مع المتقدم</span>
+    </div>
+    <div class="field">
+      <label>📅 نوع المقابلة</label>
+      <div class="interview-options" id="interviewOptions">
+        <button type="button" class="interview-opt" data-type="remote">📹 عن بُعد عبر تطبيق زوم</button>
+        <button type="button" class="interview-opt" data-type="onsite">🏢 مقابلة فعلية (حضورية)</button>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" id="approveCancelBtn">إلغاء</button>
+      <button type="button" class="btn btn-primary" id="approveConfirmBtn">✅ تأكيد</button>
+    </div>
+    <button type="button" class="btn btn-danger" id="approveRemoveBtn" style="width:100%;margin-top:10px;display:none;">إزالة علامة "مناسب"</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+  // ============ Firebase setup ============
+  // Firestore only — no Storage used, so this stays on Firebase's free Spark plan.
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+  import {
+    getFirestore, collection, addDoc, updateDoc, deleteDoc, doc,
+    onSnapshot, serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBLxBolN4YBVxFSZ79SJhe6txFmo9n0moc",
+    authDomain: "ahmmed-refaat.firebaseapp.com",
+    projectId: "ahmmed-refaat",
+    storageBucket: "ahmmed-refaat.firebasestorage.app",
+    messagingSenderId: "640850768940",
+    appId: "1:640850768940:web:5d42bcc6459b011ee90d89",
+    measurementId: "G-20YYHJ8N76"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const applicantsCol = collection(db, "applicants");
+
+  // ============ App state ============
+  let applicants = [];
+  let editingId = null;
+  let viewMode = 'active'; // 'active' | 'trash'
+
+  const listEl = document.getElementById('list');
+  const subtitleCount = document.getElementById('subtitleCount');
+  const bannerArea = document.getElementById('bannerArea');
+  const searchInput = document.getElementById('searchInput');
+  const trashBtn = document.getElementById('trashBtn');
+  const trashLabel = document.getElementById('trashLabel');
+  const trashCount = document.getElementById('trashCount');
+  const openAddBtn = document.getElementById('openAddBtn');
+  const modalOverlay = document.getElementById('modalOverlay');
+  const modalTitle = document.getElementById('modalTitle');
+  const applicantForm = document.getElementById('applicantForm');
+  const saveBtn = document.getElementById('saveBtn');
+  const toastEl = document.getElementById('toast');
+  const starPicker = document.getElementById('starPicker');
+  const fRating = document.getElementById('fRating');
+  const approveModalOverlay = document.getElementById('approveModalOverlay');
+  const approveSalaryInput = document.getElementById('approveSalaryInput');
+  const approveConfirmBtn = document.getElementById('approveConfirmBtn');
+  const approveCancelBtn = document.getElementById('approveCancelBtn');
+  const approveRemoveBtn = document.getElementById('approveRemoveBtn');
+  const interviewOptions = document.getElementById('interviewOptions');
+  let approveTargetId = null;
+  let selectedInterviewType = null;
+
+  function showToast(msg, isError){
+    toastEl.textContent = msg;
+    toastEl.className = 'toast show' + (isError ? ' error' : '');
+    setTimeout(()=>{ toastEl.className = 'toast'; }, 2600);
+  }
+
+  function escapeHtml(s){
+    return String(s || '').replace(/[&<>"']/g, function(c){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+    });
+  }
+
+  function isValidUrl(v){
+    if(!v) return true; // empty is fine, it's optional
+    try{ const u = new URL(v); return u.protocol === 'http:' || u.protocol === 'https:'; }
+    catch(e){ return false; }
+  }
+
+  // Google Drive "view" share links (drive.google.com/file/d/ID/view, ?id=ID, /open?id=ID)
+  // are HTML pages, not raw images, so <img src> can't load them directly. This extracts the
+  // file id and builds several known direct-image URL formats, tried in order — Drive
+  // sometimes blocks one hotlink style but not another, even for public "anyone with the link" files.
+  function getDriveFileId(url){
+    try{
+      const u = new URL(url);
+      if(!u.hostname.includes('drive.google.com') && !u.hostname.includes('googleusercontent.com')) return null;
+      const m = u.pathname.match(/\/file\/d\/([^/]+)/);
+      if(m) return m[1];
+      if(u.searchParams.get('id')) return u.searchParams.get('id');
+      return null;
+    }catch(e){ return null; }
+  }
+
+  function buildImageCandidates(url){
+    if(!url) return [];
+    const fileId = getDriveFileId(url);
+    if(fileId){
+      return [
+        `https://lh3.googleusercontent.com/d/${fileId}=w400`,
+        `https://drive.google.com/thumbnail?id=${fileId}&sz=w400`,
+        `https://drive.google.com/uc?export=view&id=${fileId}`
+      ];
+    }
+    return [url];
+  }
+
+  // Called from an <img onerror="..."> to advance to the next candidate URL,
+  // and finally to a placeholder if every candidate fails.
+  window.__avatarImgFallback = function(img){
+    let candidates = [];
+    try{ candidates = JSON.parse(img.getAttribute('data-candidates') || '[]'); }catch(e){}
+    let idx = parseInt(img.getAttribute('data-idx') || '0', 10) + 1;
+    if(idx < candidates.length){
+      img.setAttribute('data-idx', String(idx));
+      img.src = candidates[idx];
+    } else {
+      const initials = img.getAttribute('data-fallback-initials') || '؟';
+      const div = document.createElement('div');
+      div.className = 'avatar-placeholder';
+      div.textContent = initials;
+      img.replaceWith(div);
+    }
+  };
+
+  // Same fallback chain, for the modal's live photo preview (toggles the placeholder div instead of removing the img).
+  window.__modalPhotoFallback = function(img){
+    let candidates = [];
+    try{ candidates = JSON.parse(img.getAttribute('data-candidates') || '[]'); }catch(e){}
+    let idx = parseInt(img.getAttribute('data-idx') || '0', 10) + 1;
+    if(idx < candidates.length){
+      img.setAttribute('data-idx', String(idx));
+      img.src = candidates[idx];
+    } else {
+      img.style.display = 'none';
+      const ph = document.getElementById('photoPreviewPlaceholder');
+      if(ph) ph.style.display = 'flex';
+    }
+  };
+
+  function setStars(val){
+    fRating.value = String(val);
+    starPicker.querySelectorAll('.star').forEach(s=>{
+      s.classList.toggle('filled', parseInt(s.dataset.val, 10) <= val);
+    });
+  }
+  starPicker.querySelectorAll('.star').forEach(s=>{
+    s.addEventListener('click', ()=>{
+      const val = parseInt(s.dataset.val, 10);
+      const current = parseInt(fRating.value, 10) || 0;
+      setStars(val === current ? 0 : val); // clicking the same star again clears the rating
+    });
+  });
+
+  // Green dot indicator: filled dots colored by suitability tier (darker green = higher rating).
+  function ratingDotsHtml(rating){
+    const r = Math.max(0, Math.min(5, rating || 0));
+    if(r === 0) return '';
+    const tierColors = ['', '#d1fae5', '#a7f3d0', '#6ee7b7', '#34d399', '#059669'];
+    const color = tierColors[r];
+    let dots = '';
+    for(let i=1;i<=5;i++){
+      dots += `<span class="rating-dot" style="background:${i<=r ? color : 'var(--border)'}"></span>`;
+    }
+    return `<span class="rating-dots" title="مستوى الملاءمة: ${r}/5">${dots}</span>`;
+  }
+
+  function getTimeMillis(a){
+    if(a.createdAt && typeof a.createdAt.toMillis === 'function') return a.createdAt.toMillis();
+    if(a.createdAt instanceof Date) return a.createdAt.getTime();
+    if(typeof a.createdAt === 'number') return a.createdAt;
+    return 0;
+  }
+
+  function setInterviewType(type){
+    selectedInterviewType = type;
+    interviewOptions.querySelectorAll('.interview-opt').forEach(btn=>{
+      btn.classList.toggle('selected', btn.dataset.type === type);
+    });
+  }
+  interviewOptions.querySelectorAll('.interview-opt').forEach(btn=>{
+    btn.addEventListener('click', ()=> setInterviewType(btn.dataset.type));
+  });
+
+  function openApproveModal(id){
+    const a = applicants.find(x => x.id === id);
+    if(!a) return;
+    approveTargetId = id;
+    approveSalaryInput.value = a.proposedSalary || '4000 ريال';
+    setInterviewType(a.interviewType || null);
+    approveRemoveBtn.style.display = a.approved ? 'block' : 'none';
+    approveConfirmBtn.textContent = a.approved ? '💾 تحديث' : '✅ تأكيد';
+    approveModalOverlay.classList.add('open');
+  }
+
+  function closeApproveModal(){
+    approveModalOverlay.classList.remove('open');
+    approveTargetId = null;
+    selectedInterviewType = null;
+  }
+
+  approveCancelBtn.addEventListener('click', closeApproveModal);
+  approveModalOverlay.addEventListener('click', (e)=>{ if(e.target === approveModalOverlay) closeApproveModal(); });
+
+  approveConfirmBtn.addEventListener('click', async ()=>{
+    if(!approveTargetId) return;
+    if(!selectedInterviewType){
+      showToast('يرجى تحديد نوع المقابلة', true);
+      return;
+    }
+    const salary = approveSalaryInput.value.trim();
+    try{
+      await updateDoc(doc(db, "applicants", approveTargetId), {
+        approved: true,
+        proposedSalary: salary || null,
+        interviewType: selectedInterviewType,
+      });
+      showToast('تم وضع علامة "مناسب" وحفظ الراتب ونوع المقابلة');
+      closeApproveModal();
+    }catch(err){
+      console.error(err);
+      showToast('تعذر الحفظ، حاولي مرة أخرى', true);
+    }
+  });
+
+  approveRemoveBtn.addEventListener('click', async ()=>{
+    if(!approveTargetId) return;
+    try{
+      await updateDoc(doc(db, "applicants", approveTargetId), { approved: false });
+      showToast('تمت إزالة علامة "مناسب"');
+      closeApproveModal();
+    }catch(err){
+      console.error(err);
+      showToast('تعذر الحفظ، حاولي مرة أخرى', true);
+    }
+  });
+
+  function fmtDate(ts){
+    try{
+      const d = ts instanceof Date ? ts : new Date(ts);
+      return d.toLocaleDateString('ar-SA', {year:'numeric', month:'long', day:'numeric'});
+    }catch(e){ return ''; }
+  }
+
+  function avatarHtmlFor(a){
+    const initials = (a.name || '').trim().split(/\s+/).slice(0,2).map(w => w[0]).join('').toUpperCase();
+    if(a.photoUrl){
+      const candidates = buildImageCandidates(a.photoUrl);
+      const candStr = escapeHtml(JSON.stringify(candidates));
+      const initialsAttr = escapeHtml(initials) || '؟';
+      return `<img class="avatar" src="${candidates[0]}" data-candidates="${candStr}" data-idx="0" data-fallback-initials="${initialsAttr}" alt="${escapeHtml(a.name)}" onerror="window.__avatarImgFallback(this)">`;
+    }
+    return `<div class="avatar-placeholder">${escapeHtml(initials) || '؟'}</div>`;
+  }
+
+  function render(){
+    const q = (searchInput.value || '').trim().toLowerCase();
+    const source = applicants.filter(a => viewMode === 'trash' ? !!a.deleted : !a.deleted);
+    let items = source.slice();
+    if(q){
+      items = items.filter(a =>
+        (a.name||'').toLowerCase().includes(q) ||
+        (a.role||'').toLowerCase().includes(q)
+      );
+    }
+
+    const deletedCount = applicants.filter(a => a.deleted).length;
+    trashCount.textContent = String(deletedCount);
+    trashCount.style.display = deletedCount > 0 ? 'inline-flex' : 'none';
+
+    if(viewMode === 'trash'){
+      subtitleCount.textContent = source.length
+        ? `${source.length} في المحذوفات`
+        : 'سلة المحذوفات فارغة';
+      items.sort((x, y) => {
+        const xt = getTimeMillis({createdAt: x.deletedAt || x.createdAt});
+        const yt = getTimeMillis({createdAt: y.deletedAt || y.createdAt});
+        return yt - xt;
+      });
+    } else {
+      subtitleCount.textContent = source.length
+        ? `${source.length} متقدم${source.length>1?'ين':''} إجمالاً`
+        : 'لا يوجد متقدمون بعد';
+
+      items.sort((x, y) => {
+        const ax = x.approved ? 1 : 0, ay = y.approved ? 1 : 0;
+        if(ay !== ax) return ay - ax;
+        const rx = x.rating || 0, ry = y.rating || 0;
+        if(ry !== rx) return ry - rx;
+        return getTimeMillis(y) - getTimeMillis(x);
+      });
+    }
+
+    if(items.length === 0){
+      const emptyTitle = viewMode === 'trash'
+        ? (source.length ? 'لا توجد نتائج مطابقة للبحث' : 'سلة المحذوفات فارغة')
+        : (applicants.length ? 'لا توجد نتائج مطابقة للبحث' : 'لا يوجد متقدمون بعد');
+      const emptySub = viewMode === 'trash'
+        ? 'أي متقدم تحذفينه سيظهر هنا'
+        : (applicants.length ? 'جرّبي كلمة بحث أخرى' : 'اضغطي على "إضافة متقدم" لإضافة أول متقدم');
+      listEl.innerHTML = `
+        <div class="empty-state">
+          <div class="big-icon">${viewMode === 'trash' ? '🗑️' : '🗂️'}</div>
+          <h3>${emptyTitle}</h3>
+          <div>${emptySub}</div>
+        </div>`;
+      return;
+    }
+
+    if(viewMode === 'trash'){
+      listEl.innerHTML = items.map(a => `
+        <div class="card trashed" data-id="${a.id}">
+          <div class="card-top">
+            <div class="card-top-main">
+              ${avatarHtmlFor(a)}
+              <div>
+                <p class="applicant-name">${escapeHtml(a.name)}${a.nationality ? `<span class="nationality-badge">🌍 ${escapeHtml(a.nationality)}</span>` : ''}</p>
+                <p class="applicant-role">${escapeHtml(a.role)}</p>
+              </div>
+            </div>
+          </div>
+          <div class="card-actions">
+            <button class="restore-btn" data-id="${a.id}">↩️ استرجاع</button>
+            <button class="finalize-btn" data-id="${a.id}">❌ حذف نهائي</button>
+          </div>
+        </div>`).join('');
+
+      listEl.querySelectorAll('.restore-btn').forEach(btn=>{
+        btn.addEventListener('click', ()=> restoreApplicant(btn.dataset.id));
+      });
+      listEl.querySelectorAll('.finalize-btn').forEach(btn=>{
+        btn.addEventListener('click', ()=> finalizeDelete(btn.dataset.id));
+      });
+      return;
+    }
+
+    listEl.innerHTML = items.map(a => {
+      const cvUrl = a.cvUrl || null;
+      const pfUrl = a.portfolioUrl || null;
+      const interviewLabel = a.interviewType === 'remote' ? '📹 عن بُعد (زوم)' : (a.interviewType === 'onsite' ? '🏢 حضورية' : '');
+      return `
+      <div class="card ${a.approved ? 'approved' : ''}" data-id="${a.id}">
+        <div class="card-top">
+          <div class="card-top-main">
+            ${avatarHtmlFor(a)}
+            <div>
+              <p class="applicant-name">${escapeHtml(a.name)}${a.nationality ? `<span class="nationality-badge">🌍 ${escapeHtml(a.nationality)}</span>` : ''}</p>
+              <p class="applicant-role">${escapeHtml(a.role)}${ratingDotsHtml(a.rating)}${a.approved && a.proposedSalary ? `<span class="salary-line">💰 ${escapeHtml(a.proposedSalary)}</span>` : ''}${a.approved && interviewLabel ? `<span class="interview-line">${interviewLabel}</span>` : ''}</p>
+              <div class="applicant-meta">
+                ${a.phone ? `<span>📱 ${escapeHtml(a.phone)}</span>` : ''}
+              </div>
+            </div>
+          </div>
+        </div>
+        ${a.notes ? `<div class="applicant-notes">${escapeHtml(a.notes)}</div>` : ''}
+        <div class="card-actions">
+          <a class="file-btn ${cvUrl ? '' : 'missing'}" href="${cvUrl||'#'}" target="_blank" rel="noopener">📄 فتح السيرة الذاتية</a>
+          <a class="file-btn ${pfUrl ? '' : 'missing'}" href="${pfUrl||'#'}" target="_blank" rel="noopener">📁 فتح الأعمال</a>
+          <button class="approve-btn ${a.approved ? 'approved' : ''}" data-id="${a.id}">${a.approved ? '✅ مناسب' : '☐ وضع علامة مناسب'}</button>
+          <div class="spacer-actions">
+            <button class="icon-btn edit-btn" data-id="${a.id}">✏️ تعديل</button>
+            <button class="icon-btn danger delete-btn" data-id="${a.id}">🗑️ حذف</button>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+
+    listEl.querySelectorAll('.edit-btn').forEach(btn=>{
+      btn.addEventListener('click', ()=> openEdit(btn.dataset.id));
+    });
+    listEl.querySelectorAll('.delete-btn').forEach(btn=>{
+      btn.addEventListener('click', ()=> confirmDelete(btn.dataset.id));
+    });
+    listEl.querySelectorAll('.approve-btn').forEach(btn=>{
+      btn.addEventListener('click', ()=> openApproveModal(btn.dataset.id));
+    });
+  }
+
+  function resetForm(){
+    editingId = null;
+    applicantForm.reset();
+    setStars(0);
+    const img = document.getElementById('photoPreviewImg');
+    img.style.display = 'none';
+    img.src = '';
+    img.onerror = null;
+    img.removeAttribute('data-candidates');
+    img.removeAttribute('data-idx');
+    document.getElementById('photoPreviewPlaceholder').style.display = 'flex';
+    modalTitle.textContent = 'إضافة متقدم جديد';
+  }
+
+  function openAdd(){
+    resetForm();
+    modalOverlay.classList.add('open');
+  }
+
+  function openEdit(id){
+    const a = applicants.find(x => x.id === id);
+    if(!a) return;
+    resetForm();
+    editingId = id;
+    modalTitle.textContent = 'تعديل بيانات المتقدم';
+    document.getElementById('fName').value = a.name || '';
+    document.getElementById('fNationality').value = a.nationality || '';
+    document.getElementById('fPhone').value = a.phone || '';
+    document.getElementById('fRole').value = a.role || '';
+    document.getElementById('fNotes').value = a.notes || '';
+    document.getElementById('fCvUrl').value = a.cvUrl || '';
+    document.getElementById('fPortfolioUrl').value = a.portfolioUrl || '';
+    document.getElementById('fPhotoUrl').value = a.photoUrl || '';
+    setStars(a.rating || 0);
+    if(a.photoUrl){
+      const candidates = buildImageCandidates(a.photoUrl);
+      const img = document.getElementById('photoPreviewImg');
+      img.setAttribute('data-candidates', JSON.stringify(candidates));
+      img.setAttribute('data-idx', '0');
+      img.onerror = function(){ window.__modalPhotoFallback(img); };
+      img.src = candidates[0];
+      img.style.display = 'block';
+      document.getElementById('photoPreviewPlaceholder').style.display = 'none';
+    }
+    modalOverlay.classList.add('open');
+  }
+
+  function closeModal(){
+    modalOverlay.classList.remove('open');
+  }
+
+  async function confirmDelete(id){
+    const a = applicants.find(x => x.id === id);
+    if(!a) return;
+    try{
+      await updateDoc(doc(db, "applicants", id), { deleted: true, deletedAt: serverTimestamp() });
+      showToast('تم نقل المتقدم إلى المحذوفات');
+    }catch(err){
+      console.error(err);
+      showToast('تعذر النقل إلى المحذوفات، حاولي مرة أخرى', true);
+    }
+  }
+
+  async function restoreApplicant(id){
+    try{
+      await updateDoc(doc(db, "applicants", id), { deleted: false, deletedAt: null });
+      showToast('تم استرجاع المتقدم');
+    }catch(err){
+      console.error(err);
+      showToast('تعذر الاسترجاع، حاولي مرة أخرى', true);
+    }
+  }
+
+  async function finalizeDelete(id){
+    const a = applicants.find(x => x.id === id);
+    if(!a) return;
+    if(!confirm(`هل تريدين حذف بيانات "${a.name}" نهائيًا؟ لا يمكن التراجع عن هذا الإجراء إطلاقًا.`)) return;
+    try{
+      await deleteDoc(doc(db, "applicants", id));
+      showToast('تم الحذف النهائي');
+    }catch(err){
+      console.error(err);
+      showToast('تعذر الحذف، حاولي مرة أخرى', true);
+    }
+  }
+
+  trashBtn.addEventListener('click', ()=>{
+    viewMode = viewMode === 'trash' ? 'active' : 'trash';
+    trashLabel.textContent = viewMode === 'trash' ? '↩️ الرجوع للقائمة الرئيسية' : '🗑️ المحذوفات';
+    openAddBtn.style.display = viewMode === 'trash' ? 'none' : '';
+    render();
+  });
+
+  document.getElementById('openAddBtn').addEventListener('click', openAdd);
+  document.getElementById('cancelBtn').addEventListener('click', closeModal);
+  modalOverlay.addEventListener('click', (e)=>{ if(e.target === modalOverlay) closeModal(); });
+
+  // Live preview when the photo URL field changes
+  document.getElementById('fPhotoUrl').addEventListener('input', (e)=>{
+    const v = e.target.value.trim();
+    const img = document.getElementById('photoPreviewImg');
+    const placeholder = document.getElementById('photoPreviewPlaceholder');
+    if(v && isValidUrl(v)){
+      const candidates = buildImageCandidates(v);
+      img.setAttribute('data-candidates', JSON.stringify(candidates));
+      img.setAttribute('data-idx', '0');
+      img.onerror = function(){ window.__modalPhotoFallback(img); };
+      img.src = candidates[0];
+      img.style.display = 'block';
+      placeholder.style.display = 'none';
+    } else {
+      img.style.display = 'none';
+      placeholder.style.display = 'flex';
+    }
+  });
+
+  searchInput.addEventListener('input', render);
+
+  applicantForm.addEventListener('submit', async function(e){
+    e.preventDefault();
+    const name = document.getElementById('fName').value.trim();
+    const nationality = document.getElementById('fNationality').value.trim();
+    const role = document.getElementById('fRole').value.trim();
+    const phone = document.getElementById('fPhone').value.trim();
+    const notes = document.getElementById('fNotes').value.trim();
+    const cvUrl = document.getElementById('fCvUrl').value.trim();
+    const portfolioUrl = document.getElementById('fPortfolioUrl').value.trim();
+    const photoUrl = document.getElementById('fPhotoUrl').value.trim();
+    const rating = parseInt(fRating.value, 10) || 0;
+
+    if(!name || !role){
+      showToast('يرجى إدخال الاسم والوظيفة', true);
+      return;
+    }
+    if(!isValidUrl(cvUrl)){
+      showToast('رابط السيرة الذاتية غير صحيح، تأكدي أنه يبدأ بـ https://', true);
+      return;
+    }
+    if(!isValidUrl(portfolioUrl)){
+      showToast('رابط ملف الأعمال غير صحيح، تأكدي أنه يبدأ بـ https://', true);
+      return;
+    }
+    if(!isValidUrl(photoUrl)){
+      showToast('رابط الصورة غير صحيح، تأكدي أنه يبدأ بـ https://', true);
+      return;
+    }
+
+    saveBtn.disabled = true;
+    saveBtn.innerHTML = '<span class="spinner"></span> جارٍ الحفظ...';
+
+    try{
+      if(editingId){
+        const data = {
+          name, role, phone, notes, nationality,
+          cvUrl: cvUrl || null,
+          portfolioUrl: portfolioUrl || null,
+          photoUrl: photoUrl || null,
+          rating,
+        };
+        await updateDoc(doc(db, "applicants", editingId), data);
+        showToast('تم تحديث بيانات المتقدم');
+      } else {
+        const data = {
+          name, role, phone, notes, nationality,
+          cvUrl: cvUrl || null,
+          portfolioUrl: portfolioUrl || null,
+          photoUrl: photoUrl || null,
+          rating,
+          approved: false,
+          createdAt: serverTimestamp(),
+        };
+        await addDoc(applicantsCol, data);
+        showToast('تمت إضافة المتقدم بنجاح');
+      }
+      closeModal();
+    }catch(err){
+      console.error(err);
+      showToast('حدث خطأ أثناء الحفظ، تحققي من إعدادات Firebase وحاولي مرة أخرى', true);
+    }finally{
+      saveBtn.disabled = false;
+      saveBtn.textContent = 'حفظ المتقدم';
+    }
+  });
+
+  function init(){
+    try{
+      onSnapshot(applicantsCol, (snap) => {
+        applicants = snap.docs.map(d => Object.assign({id: d.id}, d.data()));
+        render();
+      }, (err) => {
+        console.error('firestore error', err);
+        bannerArea.innerHTML = `<div class="banner">⚠️ تعذر الاتصال بقاعدة بيانات Firebase. تأكدي من تفعيل Firestore وقواعد الأمان (Security Rules) في مشروعك.</div>`;
+      });
+    }catch(err){
+      console.error(err);
+      bannerArea.innerHTML = `<div class="banner">⚠️ حدث خطأ أثناء الاتصال بـ Firebase. تحققي من إعدادات المشروع.</div>`;
+    }
+  }
+
+  render();
+  init();
+</script>
+</body>
+</html>
