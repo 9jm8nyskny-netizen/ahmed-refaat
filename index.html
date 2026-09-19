@@ -127,27 +127,18 @@
   .star-picker .star{font-size:1.7rem;line-height:1;color:var(--border);cursor:pointer;transition:color .12s ease;user-select:none;}
   .star-picker .star.filled{color:#059669;}
   .list{display:flex;flex-direction:column;gap:12px;margin-top:6px;}
-  .list.board{
-    flex-direction:row;align-items:flex-start;gap:18px;
-    overflow-x:auto;overflow-y:hidden;padding-bottom:14px;
-    scroll-snap-type:x proximity;
+  .role-tabs{
+    display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;
   }
-  .role-column{
-    flex:0 0 300px;width:300px;display:flex;flex-direction:column;gap:12px;
-    scroll-snap-align:start;
+  .role-tab{
+    display:inline-flex;align-items:center;gap:8px;padding:9px 14px;border-radius:999px;
+    border:1px solid var(--border);background:var(--surface);color:var(--text);
+    font-family:inherit;font-size:0.86rem;font-weight:700;cursor:pointer;
+    transition:border-color .15s ease, background .15s ease, color .15s ease;
   }
-  .role-column-cards{display:flex;flex-direction:column;gap:12px;}
-  .role-group-header{
-    display:flex;align-items:center;justify-content:flex-start;gap:8px;
-    padding:10px 4px 4px;margin-top:6px;
-    position:sticky;top:0;background:var(--bg);z-index:2;
-  }
-  .list.board .role-group-header{margin-top:0;}
-  .role-group-header:first-child{margin-top:0;}
-  .role-group-header span:first-child{
-    font-size:0.95rem;font-weight:900;color:var(--primary);
-  }
-  .role-group-header::before{content:none;}
+  .role-tab:hover{border-color:var(--accent);}
+  .role-tab.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+  .role-tab.active .role-group-count{background:rgba(255,255,255,0.25);border-color:transparent;color:#fff;}
   .role-group-count{
     font-size:0.75rem;font-weight:700;color:var(--text-muted);
     background:var(--surface-2);border:1px solid var(--border);
@@ -274,6 +265,7 @@
   </header>
 
   <div id="bannerArea"></div>
+  <div class="role-tabs" id="roleTabs"></div>
   <div class="list" id="list"></div>
 </div>
 
@@ -394,8 +386,10 @@
   let applicants = [];
   let editingId = null;
   let viewMode = 'active'; // 'active' | 'trash'
+  let selectedRoleFilter = null; // null = no role chosen yet, otherwise the role name whose applicants are shown
 
   const listEl = document.getElementById('list');
+  const roleTabsEl = document.getElementById('roleTabs');
   const subtitleCount = document.getElementById('subtitleCount');
   const bannerArea = document.getElementById('bannerArea');
   const searchInput = document.getElementById('searchInput');
@@ -656,6 +650,8 @@
 
     if(items.length === 0){
       listEl.classList.remove('board');
+      roleTabsEl.style.display = 'none';
+      roleTabsEl.innerHTML = '';
       const emptyTitle = viewMode === 'trash'
         ? (source.length ? 'لا توجد نتائج مطابقة للبحث' : 'سلة المحذوفات فارغة')
         : (applicants.length ? 'لا توجد نتائج مطابقة للبحث' : 'لا يوجد متقدمون بعد');
@@ -673,6 +669,8 @@
 
     if(viewMode === 'trash'){
       listEl.classList.remove('board');
+      roleTabsEl.style.display = 'none';
+      roleTabsEl.innerHTML = '';
       listEl.innerHTML = items.map(a => `
         <div class="card trashed" data-id="${a.id}">
           <div class="card-top">
@@ -699,52 +697,74 @@
       return;
     }
 
-    // Group applicants into columns by job title (role), columns laid out
-    // side-by-side from right to left, each column holding its own cards.
-    const columnsMap = new Map();
+    // Build the row of job-title tabs. Clicking one reveals only that
+    // role's applicants; clicking it again hides them.
+    const rolesMap = new Map();
     items.forEach(a => {
       const roleKey = (a.role || '').trim() || 'بدون مسمى وظيفي';
-      if(!columnsMap.has(roleKey)) columnsMap.set(roleKey, []);
-      columnsMap.get(roleKey).push(a);
+      rolesMap.set(roleKey, (rolesMap.get(roleKey) || 0) + 1);
+    });
+    const roleNames = Array.from(rolesMap.keys());
+
+    if(selectedRoleFilter && !rolesMap.has(selectedRoleFilter)){
+      selectedRoleFilter = null;
+    }
+
+    roleTabsEl.style.display = '';
+    roleTabsEl.innerHTML = roleNames.map(roleKey => `
+      <button type="button" class="role-tab ${roleKey === selectedRoleFilter ? 'active' : ''}" data-role="${escapeHtml(roleKey)}">
+        <span>${escapeHtml(roleKey)}</span><span class="role-group-count">${rolesMap.get(roleKey)}</span>
+      </button>`).join('');
+    roleTabsEl.querySelectorAll('.role-tab').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const r = btn.dataset.role;
+        selectedRoleFilter = (selectedRoleFilter === r) ? null : r;
+        render();
+      });
     });
 
-    listEl.classList.add('board');
-    listEl.innerHTML = Array.from(columnsMap.entries()).map(([roleKey, group]) => {
-      const cardsHtml = group.map(a => {
-        const cvUrl = a.cvUrl || null;
-        const pfUrl = a.portfolioUrl || null;
-        const interviewLabel = a.interviewType === 'remote' ? '📹 عن بُعد (زوم)' : (a.interviewType === 'onsite' ? '🏢 حضورية' : '');
-        return `
-        <div class="card ${a.approved ? 'approved' : ''}" data-id="${a.id}">
-          <div class="card-top">
-            <div class="card-top-main">
-              ${avatarHtmlFor(a)}
-              <div>
-                <p class="applicant-name">${escapeHtml(a.name)}${a.nationality ? `<span class="nationality-badge">🌍 ${escapeHtml(a.nationality)}</span>` : ''}</p>
-                <p class="applicant-role">${escapeHtml(a.role)}${ratingDotsHtml(a.rating)}${a.approved && a.proposedSalary ? `<span class="salary-line">💰 ${escapeHtml(a.proposedSalary)}</span>` : ''}${a.approved && interviewLabel ? `<span class="interview-line">${interviewLabel}</span>` : ''}</p>
-                <div class="applicant-meta">
-                  ${a.phone ? `<span>📱 ${escapeHtml(a.phone)}</span>` : ''}
-                </div>
+    listEl.classList.remove('board');
+
+    if(!selectedRoleFilter){
+      listEl.innerHTML = `
+        <div class="empty-state">
+          <div class="big-icon">👆</div>
+          <h3>اختاري مسمى وظيفي من الأعلى</h3>
+          <div>اضغطي على أحد المسميات لعرض المتقدمين له</div>
+        </div>`;
+      return;
+    }
+
+    const shownItems = items.filter(a => ((a.role||'').trim() || 'بدون مسمى وظيفي') === selectedRoleFilter);
+
+    listEl.innerHTML = shownItems.map(a => {
+      const cvUrl = a.cvUrl || null;
+      const pfUrl = a.portfolioUrl || null;
+      const interviewLabel = a.interviewType === 'remote' ? '📹 عن بُعد (زوم)' : (a.interviewType === 'onsite' ? '🏢 حضورية' : '');
+      return `
+      <div class="card ${a.approved ? 'approved' : ''}" data-id="${a.id}">
+        <div class="card-top">
+          <div class="card-top-main">
+            ${avatarHtmlFor(a)}
+            <div>
+              <p class="applicant-name">${escapeHtml(a.name)}${a.nationality ? `<span class="nationality-badge">🌍 ${escapeHtml(a.nationality)}</span>` : ''}</p>
+              <p class="applicant-role">${escapeHtml(a.role)}${ratingDotsHtml(a.rating)}${a.approved && a.proposedSalary ? `<span class="salary-line">💰 ${escapeHtml(a.proposedSalary)}</span>` : ''}${a.approved && interviewLabel ? `<span class="interview-line">${interviewLabel}</span>` : ''}</p>
+              <div class="applicant-meta">
+                ${a.phone ? `<span>📱 ${escapeHtml(a.phone)}</span>` : ''}
               </div>
             </div>
           </div>
-          ${a.notes ? `<div class="applicant-notes">${escapeHtml(a.notes)}</div>` : ''}
-          <div class="card-actions">
-            <a class="file-btn ${cvUrl ? '' : 'missing'}" href="${cvUrl||'#'}" target="_blank" rel="noopener">📄 فتح السيرة الذاتية</a>
-            <a class="file-btn ${pfUrl ? '' : 'missing'}" href="${pfUrl||'#'}" target="_blank" rel="noopener">📁 فتح الأعمال</a>
-            <button class="approve-btn ${a.approved ? 'approved' : ''}" data-id="${a.id}">${a.approved ? '✅ مناسب' : '☐ وضع علامة مناسب'}</button>
-            <div class="spacer-actions">
-              <button class="icon-btn edit-btn" data-id="${a.id}">✏️ تعديل</button>
-              <button class="icon-btn danger delete-btn" data-id="${a.id}">🗑️ حذف</button>
-            </div>
+        </div>
+        ${a.notes ? `<div class="applicant-notes">${escapeHtml(a.notes)}</div>` : ''}
+        <div class="card-actions">
+          <a class="file-btn ${cvUrl ? '' : 'missing'}" href="${cvUrl||'#'}" target="_blank" rel="noopener">📄 فتح السيرة الذاتية</a>
+          <a class="file-btn ${pfUrl ? '' : 'missing'}" href="${pfUrl||'#'}" target="_blank" rel="noopener">📁 فتح الأعمال</a>
+          <button class="approve-btn ${a.approved ? 'approved' : ''}" data-id="${a.id}">${a.approved ? '✅ مناسب' : '☐ وضع علامة مناسب'}</button>
+          <div class="spacer-actions">
+            <button class="icon-btn edit-btn" data-id="${a.id}">✏️ تعديل</button>
+            <button class="icon-btn danger delete-btn" data-id="${a.id}">🗑️ حذف</button>
           </div>
-        </div>`;
-      }).join('');
-
-      return `
-      <div class="role-column">
-        <div class="role-group-header"><span>${escapeHtml(roleKey)}</span><span class="role-group-count">${group.length}</span></div>
-        <div class="role-column-cards">${cardsHtml}</div>
+        </div>
       </div>`;
     }).join('');
 
