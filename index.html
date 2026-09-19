@@ -303,7 +303,7 @@
       <div class="field">
         <label>📄 رابط السيرة الذاتية (CV)</label>
         <input type="url" id="fCvUrl" placeholder="رابط Google Drive أو LinkedIn...">
-        <span class="hint">الصقي رابط مشاركة الملف من Google Drive (تأكدي أن إعداد المشاركة "أي شخص لديه الرابط")، أو رابط LinkedIn</span>
+        <span class="hint">الصق رابط مشاركة الملف من Google Drive (تأكد أن إعداد المشاركة "أي شخص لديه الرابط")، أو رابط LinkedIn</span>
       </div>
       <div class="field">
         <label>📁 رابط ملف الأعمال (Portfolio)</label>
@@ -656,8 +656,8 @@
         ? (source.length ? 'لا توجد نتائج مطابقة للبحث' : 'سلة المحذوفات فارغة')
         : (applicants.length ? 'لا توجد نتائج مطابقة للبحث' : 'لا يوجد متقدمون بعد');
       const emptySub = viewMode === 'trash'
-        ? 'أي متقدم تحذفينه سيظهر هنا'
-        : (applicants.length ? 'جرّبي كلمة بحث أخرى' : 'اضغطي على "إضافة متقدم" لإضافة أول متقدم');
+        ? 'أي متقدم تحذفه سيظهر هنا'
+        : (applicants.length ? 'جرّب كلمة بحث أخرى' : 'اضغط على "إضافة متقدم" لإضافة أول متقدم');
       listEl.innerHTML = `
         <div class="empty-state">
           <div class="big-icon">${viewMode === 'trash' ? '🗑️' : '🗂️'}</div>
@@ -729,8 +729,8 @@
       listEl.innerHTML = `
         <div class="empty-state">
           <div class="big-icon">👆</div>
-          <h3>اختاري مسمى وظيفي من الأعلى</h3>
-          <div>اضغطي على أحد المسميات لعرض المتقدمين له</div>
+          <h3>اختار مسمى وظيفي من الأعلى</h3>
+          <div>اضغط على أحد المسميات لعرض المتقدمين له</div>
         </div>`;
       return;
     }
@@ -914,15 +914,15 @@
       return;
     }
     if(!isValidUrl(cvUrl)){
-      showToast('رابط السيرة الذاتية غير صحيح، تأكدي أنه يبدأ بـ https://', true);
+      showToast('رابط السيرة الذاتية غير صحيح، تأكد أنه يبدأ بـ https://', true);
       return;
     }
     if(!isValidUrl(portfolioUrl)){
-      showToast('رابط ملف الأعمال غير صحيح، تأكدي أنه يبدأ بـ https://', true);
+      showToast('رابط ملف الأعمال غير صحيح، تأكد أنه يبدأ بـ https://', true);
       return;
     }
     if(!isValidUrl(photoUrl)){
-      showToast('رابط الصورة غير صحيح، تأكدي أنه يبدأ بـ https://', true);
+      showToast('رابط الصورة غير صحيح، تأكد أنه يبدأ بـ https://', true);
       return;
     }
 
@@ -970,7 +970,7 @@
         render();
       }, (err) => {
         console.error('firestore error', err);
-        bannerArea.innerHTML = `<div class="banner">⚠️ تعذر الاتصال بقاعدة بيانات Firebase. تأكدي من تفعيل Firestore وقواعد الأمان (Security Rules) في مشروعك.</div>`;
+        bannerArea.innerHTML = `<div class="banner">⚠️ تعذر الاتصال بقاعدة بيانات Firebase. تأكد من تفعيل Firestore وقواعد الأمان (Security Rules) في مشروعك.</div>`;
       });
     }catch(err){
       console.error(err);
