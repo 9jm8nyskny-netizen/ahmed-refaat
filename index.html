@@ -127,6 +127,20 @@
   .star-picker .star{font-size:1.7rem;line-height:1;color:var(--border);cursor:pointer;transition:color .12s ease;user-select:none;}
   .star-picker .star.filled{color:#059669;}
   .list{display:flex;flex-direction:column;gap:12px;margin-top:6px;}
+  .role-group-header{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+    padding:10px 4px 4px;margin-top:6px;
+  }
+  .role-group-header:first-child{margin-top:0;}
+  .role-group-header span:first-child{
+    font-size:0.95rem;font-weight:900;color:var(--primary);
+  }
+  .role-group-header::before{content:none;}
+  .role-group-count{
+    font-size:0.75rem;font-weight:700;color:var(--text-muted);
+    background:var(--surface-2);border:1px solid var(--border);
+    padding:2px 9px;border-radius:999px;
+  }
   .card{
     background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
     padding:16px 18px;box-shadow:var(--shadow);transition:box-shadow .15s ease;
@@ -617,10 +631,13 @@
         : 'لا يوجد متقدمون بعد';
 
       items.sort((x, y) => {
+        const rx = (x.role || '').trim(), ry = (y.role || '').trim();
+        const rc = rx.localeCompare(ry, 'ar');
+        if(rc !== 0) return rc;
         const ax = x.approved ? 1 : 0, ay = y.approved ? 1 : 0;
         if(ay !== ax) return ay - ax;
-        const rx = x.rating || 0, ry = y.rating || 0;
-        if(ry !== rx) return ry - rx;
+        const ratx = x.rating || 0, raty = y.rating || 0;
+        if(raty !== ratx) return raty - ratx;
         return getTimeMillis(y) - getTimeMillis(x);
       });
     }
@@ -668,11 +685,20 @@
       return;
     }
 
+    let lastRole = null;
     listEl.innerHTML = items.map(a => {
       const cvUrl = a.cvUrl || null;
       const pfUrl = a.portfolioUrl || null;
       const interviewLabel = a.interviewType === 'remote' ? '📹 عن بُعد (زوم)' : (a.interviewType === 'onsite' ? '🏢 حضورية' : '');
+      const roleKey = (a.role || '').trim();
+      let groupHeader = '';
+      if(roleKey !== lastRole){
+        lastRole = roleKey;
+        const countInGroup = items.filter(it => (it.role||'').trim() === roleKey).length;
+        groupHeader = `<div class="role-group-header"><span>${escapeHtml(roleKey || 'بدون مسمى وظيفي')}</span><span class="role-group-count">${countInGroup}</span></div>`;
+      }
       return `
+      ${groupHeader}
       <div class="card ${a.approved ? 'approved' : ''}" data-id="${a.id}">
         <div class="card-top">
           <div class="card-top-main">
