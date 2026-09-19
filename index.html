@@ -336,7 +336,7 @@
 <div class="modal-overlay" id="approveModalOverlay">
   <div class="modal" style="max-width:380px;">
     <h2>تحديد الراتب المناسب</h2>
-    <div class="modal-sub">حدّدي الراتب المناسب لهذا المتقدم، وسيتواصل فريق شؤون الموظفين معه بناءً على هذا الراتب</div>
+    <div class="modal-sub">حدّد الراتب المناسب لهذا المتقدم، وسيتواصل فريق شؤون الموظفين معه بناءً على هذا الراتب</div>
     <div class="field">
       <label>💰 الراتب المناسب للتواصل</label>
       <input type="text" id="approveSalaryInput" placeholder="مثال: 4000 ريال">
@@ -540,7 +540,7 @@
     const a = applicants.find(x => x.id === id);
     if(!a) return;
     approveTargetId = id;
-    approveSalaryInput.value = a.proposedSalary || '4000 ريال';
+    approveSalaryInput.value = a.proposedSalary || '';
     setInterviewType(a.interviewType || null);
     approveRemoveBtn.style.display = a.approved ? 'block' : 'none';
     approveConfirmBtn.textContent = a.approved ? '💾 تحديث' : '✅ تأكيد';
